@@ -3,9 +3,10 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const { NODE_ENV } = require("./config");
-const logger = require("./logger"); // TODO
-// const helmet = require("helmet"); // TODO
-//const noteRouter = require("./note/noteRouter") // TODO
+const logger = require("./logger");
+const helmet = require("helmet");
+// const noteRouter = require("./note/noteRouter");
+
 //const folderRouter = require("./folder/folderRouter") // TODO
 
 const app = express();
@@ -13,9 +14,9 @@ const morganSetting = NODE_ENV === "production" ? "tiny" : "dev";
 
 app.use(morgan(morganSetting));
 app.use(cors());
-//app.use(helmet()); // TODO
+app.use(helmet()); // TODO
 //app.use(validateBearerToken); // TODO
-//app.use("/api", noteRouter, folderRouter); // TODO
+app.use("/api", noteRouter, folderRouter); // TODO
 
 // ___________ADD VALIDATION__________
 
