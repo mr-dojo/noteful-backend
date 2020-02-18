@@ -22,5 +22,23 @@ noteRouter.route("/notes").get((req, res, next) => {
     })
     .catch(next);
 });
+//_________NEXT___________ .post endpoint
+
+noteRouter
+  .route("/notes/:note_id")
+  .all((req, res, next) => {
+    NoteService.getById(req.app.get("db"), req.params.note_id)
+      .then(note => {
+        if (!note) {
+          return res.status(404).json({
+            error: { message: `note doesn't exist` }
+          });
+        }
+        res.note = note; // save the note for the next middleware
+        next(); // don't forget to call next so the next middleware happens!
+      })
+      .catch(next);
+  })
+  .get((req, res, next) => res.status(200).json(res.note));
 
 module.exports = noteRouter;
