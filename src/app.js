@@ -6,7 +6,7 @@ const { NODE_ENV } = require("./config");
 const logger = require("./logger");
 const helmet = require("helmet");
 const noteRouter = require("./note/note-router");
-const folderRouter = require("./folder/folder-router"); // TODO
+const folderRouter = require("./folder/folder-router");
 
 const app = express();
 const morganSetting = NODE_ENV === "production" ? "tiny" : "dev";
@@ -15,7 +15,7 @@ app.use(morgan(morganSetting));
 app.use(cors());
 app.use(helmet());
 app.use("/api/notes", noteRouter);
-app.use("/api/folders", folderRouter); // TODO
+app.use("/api/folders", folderRouter);
 
 //app.use(validateBearerToken); // TODO
 // ___________ADD VALIDATION__________

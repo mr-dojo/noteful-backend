@@ -7,58 +7,60 @@ const folderRouter = express.Router();
 const jsonParser = express.json();
 
 const serializeFolder = folder => ({
+  id: folder.id,
   name: xss(folder.name)
 });
 
-folderRouter.route("/").get((req, res, next) => {
-  FolderService.getAllFolders(req.app.get("db"))
-    .then(folder => {
-      res.json(folder.map(serializeFolder));
-    })
-    .catch(next);
-});
-//   .post(jsonParser, (req, res, next) => {
-//     const { name, content, folder_id } = req.body;
-//     const newNote = { name, content, folder_id };
+folderRouter
+  .route("/")
+  .get((req, res, next) => {
+    FolderService.getAllFolders(req.app.get("db"))
+      .then(folder => {
+        res.json(folder.map(serializeFolder));
+      })
+      .catch(next);
+  })
+  .post(jsonParser, (req, res, next) => {
+    const { name } = req.body;
+    const newFolder = { name };
 
-//     for (const [key, value] of Object.entries(newNote)) {
-//       if (value == null) {
-//         return res.status(400).json({
-//           error: { message: `Missing '${key}' in request body` }
-//         });
-//       }
-//     }
-//     NoteService.insertNote(req.app.get("db"), newNote)
-//       .then(note => {
-//         res
-//           .status(201)
-//           .location(path.posix.join(req.originalUrl, `/${note.id}`))
-//           .json(serializeNote(note));
-//       })
-//       .catch(next);
-//   });
+    if (!name) {
+      return res.status(400).json({
+        error: { message: `Missing 'name' in request body` }
+      });
+    }
 
-// noteRouter
-//   .route("/:note_id")
-//   .all((req, res, next) => {
-//     NoteService.getById(req.app.get("db"), req.params.note_id)
-//       .then(note => {
-//         if (!note) {
-//           return res.status(404).json({
-//             error: { message: `note doesn't exist` }
-//           });
-//         }
-//         res.note = note; // save the note for the next middleware
-//         next(); // don't forget to call next so the next middleware happens!
-//       })
-//       .catch(next);
-//   })
-//   .get((req, res, next) => res.status(200).json(res.note))
+    FolderService.insertFolder(req.app.get("db"), newFolder)
+      .then(folder => {
+        res
+          .status(201)
+          .location(path.posix.join(req.originalUrl, `/${folder.id}`))
+          .json(serializeFolder(folder));
+      })
+      .catch(next);
+  });
+
+folderRouter
+  .route("/:folder_id")
+  .all((req, res, next) => {
+    FolderService.getById(req.app.get("db"), req.params.folder_id)
+      .then(folder => {
+        if (!folder) {
+          return res.status(404).json({
+            error: { message: `folder doesn't exist` }
+          });
+        }
+        res.folder = folder; // save the folder for the next middleware
+        next(); // don't forget to call next so the next middleware happens!
+      })
+      .catch(next);
+  })
+  .get((req, res, next) => res.status(200).json(res.folder));
 //   .patch(jsonParser, (req, res, next) => {
 //     const { name, content, folder_id } = req.body;
-//     const noteToUpdate = { name, content, folder_id };
+//     const folderToUpdate = { name, content, folder_id };
 
-//     const numberOfValues = Object.values(noteToUpdate).filter(Boolean).length;
+//     const numberOfValues = Object.values(folderToUpdate).filter(Boolean).length;
 //     if (numberOfValues === 0) {
 //       return res.status(400).json({
 //         error: {
