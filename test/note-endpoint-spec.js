@@ -16,19 +16,14 @@ describe("note Endpoints", function() {
 
   after("disconnect from db", () => db.destroy());
 
-  after("cleanup", () => {
-    db.raw("TRUNCATE TABLE note, folder RESTART IDENTITY CASCADE");
-    console.log("after cleanup ran");
-  });
-
   before("clean the table", () => {
-    db.raw("TRUNCATE TABLE note, folder RESTART IDENTITY CASCADE");
-    console.log("before cleanup ran");
+    db.raw("TRUNCATE TABLE note RESTART IDENTITY CASCADE");
+    db.raw("TRUNCATE TABLE folder RESTART IDENTITY CASCADE");
   });
 
   afterEach("cleanup", () => {
-    db.raw("TRUNCATE TABLE note, folder RESTART IDENTITY CASCADE");
-    console.log("afterEach cleanup ran");
+    db.raw("TRUNCATE TABLE folder RESTART IDENTITY CASCADE");
+    db.raw("TRUNCATE TABLE note RESTART IDENTITY CASCADE");
   });
 
   describe(`GET /api/notes`, () => {
@@ -44,12 +39,10 @@ describe("note Endpoints", function() {
       const testNotes = makeNoteArray();
 
       beforeEach("insert notes", () => {
-        console.log("beforeEach insert notes was triggered");
         return db
           .into("folder")
           .insert(testFolders)
           .then(() => {
-            console.log("insert testNotes ran");
             return db.into("note").insert(testNotes);
           });
       });
@@ -75,12 +68,10 @@ describe("note Endpoints", function() {
       const testNotes = makeNoteArray();
 
       beforeEach("insert notes", () => {
-        console.log("beforeEach insert notes was triggered");
         return db
           .into("folder")
           .insert(testFolders)
           .then(() => {
-            console.log("insert testNotes ran");
             return db.into("note").insert(testNotes);
           });
       });
@@ -93,9 +84,14 @@ describe("note Endpoints", function() {
       });
     });
   });
-  describe.only(`POST /api/note`, () => {
+  describe(`POST /api/notes`, () => {
+    const testFolders = makeFolderArray();
+
+    beforeEach("insert folders", () => {
+      return db.into("folder").insert(testFolders);
+    });
+
     it(`creates an note, responding with 201 and the new note`, function() {
-      this.retries(3);
       const newNote = {
         name: "New Test",
         folder_id: 3,
@@ -111,9 +107,9 @@ describe("note Endpoints", function() {
           expect(res.body.content).to.eql(newNote.content);
           expect(res.body).to.have.property("id");
           expect(res.headers.location).to.eql(`/api/notes/${res.body.id}`);
-          // const expected = new Date().toLocaleString();
-          // const actual = new Date(res.body.modif).toLocaleString();
-          // expect(actual).to.eql(expected);
+          const expected = new Date().toLocaleString();
+          const actual = new Date(res.body.modified).toLocaleString();
+          expect(actual).to.eql(expected);
         })
         .then(postRes =>
           supertest(app)

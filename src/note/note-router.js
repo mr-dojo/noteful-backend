@@ -1,31 +1,51 @@
+const path = require("path");
 const express = require("express");
 const NoteService = require("./note-service");
-// const xss = require("xss");
+const xss = require("xss");
 
 const noteRouter = express.Router();
 const jsonParser = express.json();
 
-// const serializeArticle = article => ({ _______Impliment XSS____
-//   id: article.id,
-//   style: article.style,
-//   title: xss(article.title),
-//   content: xss(article.content),
-//   date_published: article.date_published,
-//   author: article.author
-// });
-
-noteRouter.route("/notes").get((req, res, next) => {
-  NoteService.getAllNotes(req.app.get("db"))
-    .then(note => {
-      // res.json(note.map(serializeArticle))
-      res.json(note);
-    })
-    .catch(next);
+const serializeNote = note => ({
+  id: note.id,
+  name: note.name,
+  folder_id: note.folder_id,
+  content: xss(note.content),
+  modified: note.modified
 });
-//_________NEXT___________ .post endpoint
 
 noteRouter
-  .route("/notes/:note_id")
+  .route("/")
+  .get((req, res, next) => {
+    NoteService.getAllNotes(req.app.get("db"))
+      .then(note => {
+        res.json(note.map(serializeNote));
+      })
+      .catch(next);
+  })
+  .post(jsonParser, (req, res, next) => {
+    const { name, content, folder_id } = req.body;
+    const newNote = { name, content, folder_id };
+
+    for (const [key, value] of Object.entries(newNote)) {
+      if (value == null) {
+        return res.status(400).json({
+          error: { message: `Missing '${key}' in request body` }
+        });
+      }
+    }
+    NoteService.insertNote(req.app.get("db"), newNote)
+      .then(note => {
+        res
+          .status(201)
+          .location(path.posix.join(req.originalUrl, `/${note.id}`))
+          .json(serializeNote(note));
+      })
+      .catch(next);
+  });
+
+noteRouter
+  .route("/:note_id")
   .all((req, res, next) => {
     NoteService.getById(req.app.get("db"), req.params.note_id)
       .then(note => {

@@ -15,7 +15,7 @@ const morganSetting = NODE_ENV === "production" ? "tiny" : "dev";
 app.use(morgan(morganSetting));
 app.use(cors());
 app.use(helmet()); // TODO
-app.use("/api", noteRouter);
+app.use("/api/notes", noteRouter);
 //app.use(validateBearerToken); // TODO
 // app.use("/api", noteRouter, folderRouter); // TODO
 
