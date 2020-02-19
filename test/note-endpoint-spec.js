@@ -117,5 +117,25 @@ describe("note Endpoints", function() {
             .expect(postRes.body)
         );
     });
+    const requiredFields = ["name", "content", "folder_id"];
+
+    requiredFields.forEach(field => {
+      const newNote = {
+        name: "Updated note",
+        content: "Example updated content",
+        folder_id: 2
+      };
+
+      it.only(`responds with 400 and an error message when the '${field}' is missing`, () => {
+        delete newNote[field];
+
+        return supertest(app)
+          .post("/api/notes")
+          .send(newNote)
+          .expect(400, {
+            error: { message: `Missing '${field}' in request body` }
+          });
+      });
+    });
   });
 });
