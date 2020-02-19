@@ -78,14 +78,14 @@ folderRouter
         res.status(204).end();
       })
       .catch(next);
+  })
+  .delete((req, res, next) => {
+    const knexInstance = req.app.get("db");
+    FolderService.deleteFolder(knexInstance, req.params.folder_id)
+      .then(numRowsAffected => {
+        res.status(204).end();
+      })
+      .catch(next);
   });
-//   .delete((req, res, next) => {
-//     const knexInstance = req.app.get("db");
-//     NoteService.deleteNote(knexInstance, req.params.note_id)
-//       .then(numRowsAffected => {
-//         res.status(204).end();
-//       })
-//       .catch(next);
-//   });
 
 module.exports = folderRouter;

@@ -1,7 +1,6 @@
 const knex = require("knex");
 const app = require("../src/app");
 const { makeFolderArray } = require("./folder-fixtures");
-// const { makeNoteArray } = require("./note-fixtures"); // Don't need this.. right?
 
 describe("folders Endpoints", function() {
   let db;
@@ -76,7 +75,7 @@ describe("folders Endpoints", function() {
     });
   });
 
-  describe(`POST /api/notes`, () => {
+  describe(`POST /api/folders`, () => {
     const testFolders = makeFolderArray();
 
     beforeEach("insert folders", () => {
@@ -122,7 +121,7 @@ describe("folders Endpoints", function() {
     });
   });
 
-  describe.only(`PATCH /apiFolders/:folder_id`, () => {
+  describe(`PATCH /apiFolders/:folder_id`, () => {
     context(`Given no folders`, () => {
       it(`responds with 404`, () => {
         const folderId = 123456;
@@ -160,40 +159,37 @@ describe("folders Endpoints", function() {
       });
     });
   });
+
+  describe.only(`DELETE /api/folders/:folder_id`, () => {
+    context(`Given no folders`, () => {
+      it(`responds with 404`, () => {
+        const folderId = 123456;
+        return supertest(app)
+          .delete(`/api/folders/${folderId}`)
+          .expect(404, { error: { message: `folder doesn't exist` } });
+      });
+    });
+    context("Given there are folders in the database", () => {
+      const testFolders = makeFolderArray();
+
+      beforeEach("insert folders", () => {
+        return db.into("folder").insert(testFolders);
+      });
+
+      it("responds with 204 and removes the folder", () => {
+        const idToRemove = 2;
+        const expectedFolders = testFolders.filter(
+          folder => folder.id !== idToRemove
+        );
+        return supertest(app)
+          .delete(`/api/folders/${idToRemove}`)
+          .expect(204)
+          .then(res =>
+            supertest(app)
+              .get(`/api/folders`)
+              .expect(expectedFolders)
+          );
+      });
+    });
+  });
 });
-//   describe(`DELETE /api/notes/:note_id`, () => {
-//     context(`Given no notes`, () => {
-//       it(`responds with 404`, () => {
-//         const noteId = 123456;
-//         return supertest(app)
-//           .delete(`/api/notes/${noteId}`)
-//           .expect(404, { error: { message: `note doesn't exist` } });
-//       });
-//     });
-//     context("Given there are notes in the database", () => {
-//       const testNotes = makeNoteArray();
-//       const testFolders = makeFolderArray();
-
-//       beforeEach("insert notes", () => {
-//         return db
-//           .into("folder")
-//           .insert(testFolders)
-//           .then(() => {
-//             return db.into("note").insert(testNotes);
-//           });
-//       });
-
-//       it("responds with 204 and removes the note", () => {
-//         const idToRemove = 2;
-//         const expectedNotes = testNotes.filter(note => note.id !== idToRemove);
-//         return supertest(app)
-//           .delete(`/api/notes/${idToRemove}`)
-//           .expect(204)
-//           .then(res =>
-//             supertest(app)
-//               .get(`/api/notes`)
-//               .expect(expectedNotes)
-//           );
-//       });
-//     });
-//   });
