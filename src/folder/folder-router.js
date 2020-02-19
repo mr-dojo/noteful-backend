@@ -55,26 +55,30 @@ folderRouter
       })
       .catch(next);
   })
-  .get((req, res, next) => res.status(200).json(res.folder));
-//   .patch(jsonParser, (req, res, next) => {
-//     const { name, content, folder_id } = req.body;
-//     const folderToUpdate = { name, content, folder_id };
+  .get((req, res, next) => res.status(200).json(res.folder))
+  .patch(jsonParser, (req, res, next) => {
+    const { name } = req.body;
+    const folderToUpdate = { name };
 
-//     const numberOfValues = Object.values(folderToUpdate).filter(Boolean).length;
-//     if (numberOfValues === 0) {
-//       return res.status(400).json({
-//         error: {
-//           message: `Request body must contain either "name", "folder_id", or "content"`
-//         }
-//       });
-//     }
+    const numberOfValues = Object.values(folderToUpdate).filter(Boolean).length;
+    if (numberOfValues === 0) {
+      return res.status(400).json({
+        error: {
+          message: `Request body must contain "name"`
+        }
+      });
+    }
 
-//     NoteService.updateNote(req.app.get("db"), req.params.note_id, noteToUpdate)
-//       .then(numRowsAffected => {
-//         res.status(204).end();
-//       })
-//       .catch(next);
-//   })
+    FolderService.updateFolder(
+      req.app.get("db"),
+      req.params.folder_id,
+      folderToUpdate
+    )
+      .then(numRowsAffected => {
+        res.status(204).end();
+      })
+      .catch(next);
+  });
 //   .delete((req, res, next) => {
 //     const knexInstance = req.app.get("db");
 //     NoteService.deleteNote(knexInstance, req.params.note_id)

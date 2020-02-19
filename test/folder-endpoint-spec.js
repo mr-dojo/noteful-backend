@@ -46,6 +46,7 @@ describe("folders Endpoints", function() {
       });
     });
   });
+
   describe(`GET /api/folders/:folder_id`, () => {
     context(`Given no folders`, () => {
       it(`responds with 404`, () => {
@@ -74,7 +75,8 @@ describe("folders Endpoints", function() {
       });
     });
   });
-  describe.only(`POST /api/notes`, () => {
+
+  describe(`POST /api/notes`, () => {
     const testFolders = makeFolderArray();
 
     beforeEach("insert folders", () => {
@@ -100,71 +102,65 @@ describe("folders Endpoints", function() {
             .expect(postRes.body)
         );
     });
-    // const requiredFields = ["name", "content", "folder_id"];
+    const requiredFields = ["name"];
 
-    // requiredFields.forEach(field => {
-    //   const newNote = {
-    //     name: "Updated note",
-    //     content: "Example updated content",
-    //     folder_id: 2
-    //   };
+    requiredFields.forEach(field => {
+      const newFolder = {
+        name: "UpdatedwFolder"
+      };
 
-    // it(`responds with 400 and an error message when the '${field}' is missing`, () => {
-    //   delete newNote[field];
+      it(`responds with 400 and an error message when the '${field}' is missing`, () => {
+        delete newFolder[field];
 
-    //   return supertest(app)
-    //     .post("/api/notes")
-    //     .send(newNote)
-    //     .expect(400, {
-    //       error: { message: `Missing '${field}' in request body` }
-    //     });
-    // });
+        return supertest(app)
+          .post("/api/folders")
+          .send(newFolder)
+          .expect(400, {
+            error: { message: `Missing '${field}' in request body` }
+          });
+      });
+    });
+  });
+
+  describe.only(`PATCH /apiFolders/:folder_id`, () => {
+    context(`Given no folders`, () => {
+      it(`responds with 404`, () => {
+        const folderId = 123456;
+        return supertest(app)
+          .patch(`/api/folders/${folderId}`)
+          .expect(404, { error: { message: `folder doesn't exist` } });
+      });
+    });
+    context("Given there are folders in the database", () => {
+      const testFolders = makeFolderArray();
+
+      beforeEach("insert folders", () => {
+        return db.into("folder").insert(testFolders);
+      });
+
+      it("responds with 204 and updates the folder", () => {
+        const idToUpdate = 2;
+        const updateFolder = {
+          name: "updated folder name"
+        };
+        const expectedFolder = {
+          id: idToUpdate,
+          ...testFolders[idToUpdate - 1],
+          ...updateFolder
+        };
+        return supertest(app)
+          .patch(`/api/folders/${idToUpdate}`)
+          .send(updateFolder)
+          .expect(204)
+          .then(res =>
+            supertest(app)
+              .get(`/api/folders/${idToUpdate}`)
+              .expect(expectedFolder)
+          );
+      });
+    });
   });
 });
-//   describe(`PATCH /api/notes/:note_id`, () => {
-//     context(`Given no notes`, () => {
-//       it(`responds with 404`, () => {
-//         const noteId = 123456;
-//         return supertest(app)
-//           .patch(`/api/notes/${noteId}`)
-//           .expect(404, { error: { message: `note doesn't exist` } });
-//       });
-//     });
-//     context("Given there are notes in the database", () => {
-//       const testNotes = makeNoteArray();
-//       const testFolders = makeFolderArray();
-
-//       beforeEach("insert notes", () => {
-//         return db
-//           .into("folder")
-//           .insert(testFolders)
-//           .then(() => {
-//             return db.into("note").insert(testNotes);
-//           });
-//       });
-//       it("responds with 204 and updates the note", () => {
-//         const idToUpdate = 2;
-//         const updateNote = {
-//           name: "updated note name",
-//           folder_id: 2,
-//           content: "updated note content"
-//         };
-//         const expectedNote = {
-//           ...testNotes[idToUpdate - 1],
-//           ...updateNote
-//         };
-//         return supertest(app)
-//           .patch(`/api/notes/${idToUpdate}`)
-//           .send(updateNote)
-//           .expect(204)
-//           .then(res =>
-//             supertest(app)
-//               .get(`/api/notes/${idToUpdate}`)
-//               .expect(expectedNote)
-//           );
-//       });
-//     });
-//   });
 //   describe(`DELETE /api/notes/:note_id`, () => {
 //     context(`Given no notes`, () => {
 //       it(`responds with 404`, () => {
