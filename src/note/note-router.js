@@ -59,6 +59,25 @@ noteRouter
       })
       .catch(next);
   })
-  .get((req, res, next) => res.status(200).json(res.note));
+  .get((req, res, next) => res.status(200).json(res.note))
+  .patch(jsonParser, (req, res, next) => {
+    const { name, content, folder_id } = req.body;
+    const noteToUpdate = { name, content, folder_id };
+
+    const numberOfValues = Object.values(noteToUpdate).filter(Boolean).length;
+    if (numberOfValues === 0) {
+      return res.status(400).json({
+        error: {
+          message: `Request body must contain either "name", "folder_id", or "content"`
+        }
+      });
+    }
+
+    NoteService.updateNote(req.app.get("db"), req.params.note_id, noteToUpdate)
+      .then(numRowsAffected => {
+        res.status(204).end();
+      })
+      .catch(next);
+  });
 
 module.exports = noteRouter;

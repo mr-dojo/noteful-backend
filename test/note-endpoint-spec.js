@@ -126,7 +126,7 @@ describe("note Endpoints", function() {
         folder_id: 2
       };
 
-      it.only(`responds with 400 and an error message when the '${field}' is missing`, () => {
+      it(`responds with 400 and an error message when the '${field}' is missing`, () => {
         delete newNote[field];
 
         return supertest(app)
@@ -135,6 +135,50 @@ describe("note Endpoints", function() {
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
           });
+      });
+    });
+  });
+  describe.only(`PATCH /api/notes/:note_id`, () => {
+    context(`Given no notes`, () => {
+      it(`responds with 404`, () => {
+        const noteId = 123456;
+        return supertest(app)
+          .patch(`/api/notes/${noteId}`)
+          .expect(404, { error: { message: `note doesn't exist` } });
+      });
+    });
+    context("Given there are notes in the database", () => {
+      const testNotes = makeNoteArray();
+      const testFolders = makeFolderArray();
+
+      beforeEach("insert notes", () => {
+        return db
+          .into("folder")
+          .insert(testFolders)
+          .then(() => {
+            return db.into("note").insert(testNotes);
+          });
+      });
+      it("responds with 204 and updates the note", () => {
+        const idToUpdate = 2;
+        const updateNote = {
+          name: "updated note name",
+          folder_id: 2,
+          content: "updated note content"
+        };
+        const expectedNote = {
+          ...testNotes[idToUpdate - 1],
+          ...updateNote
+        };
+        return supertest(app)
+          .patch(`/api/notes/${idToUpdate}`)
+          .send(updateNote)
+          .expect(204)
+          .then(res =>
+            supertest(app)
+              .get(`/api/notes/${idToUpdate}`)
+              .expect(expectedNote)
+          );
       });
     });
   });
