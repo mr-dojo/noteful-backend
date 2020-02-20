@@ -19,6 +19,24 @@ function makeFolderArray() {
   ];
 }
 
+function makeFolderArrayNoId() {
+  return [
+    {
+      name: "Important"
+    },
+    {
+      name: "Super"
+    },
+    {
+      name: "Spangley"
+    },
+    {
+      name: "Carlo Test"
+    }
+  ];
+}
+
 module.exports = {
-  makeFolderArray
+  makeFolderArray,
+  makeFolderArrayNoId
 };

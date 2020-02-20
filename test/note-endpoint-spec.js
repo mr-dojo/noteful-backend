@@ -1,6 +1,6 @@
 const knex = require("knex");
 const app = require("../src/app");
-const { makeFolderArray } = require("./folder-fixtures");
+const { makeFolderArray, makeFolderArrayNoId } = require("./folder-fixtures");
 const { makeNoteArray } = require("./note-fixtures");
 
 describe("note Endpoints", function() {
@@ -85,10 +85,10 @@ describe("note Endpoints", function() {
     });
   });
   describe(`POST /api/notes`, () => {
-    const testFolders = makeFolderArray();
+    const testFoldersNoId = makeFolderArrayNoId();
 
     beforeEach("insert folders", () => {
-      return db.into("folder").insert(testFolders);
+      return db.into("folder").insert(testFoldersNoId);
     });
 
     it(`creates an note, responding with 201 and the new note`, function() {

@@ -45,7 +45,6 @@ describe("folders Endpoints", function() {
       });
     });
   });
-
   describe(`GET /api/folders/:folder_id`, () => {
     context(`Given no folders`, () => {
       it(`responds with 404`, () => {
@@ -74,19 +73,10 @@ describe("folders Endpoints", function() {
       });
     });
   });
-
   describe(`POST /api/folders`, () => {
-    const testFolders = makeFolderArray();
-
-    beforeEach("insert folders", () => {
-      return db.into("folder").insert(testFolders);
-    });
-
     it(`creates an folder, responding with 201 and the new folder`, function() {
       const newFolder = {
-        name: "New Test",
-        folder_id: 3,
-        content: "This is test content"
+        name: "New Test"
       };
       return supertest(app)
         .post("/api/folders")
@@ -105,7 +95,7 @@ describe("folders Endpoints", function() {
 
     requiredFields.forEach(field => {
       const newFolder = {
-        name: "UpdatedwFolder"
+        name: "Updated Folder"
       };
 
       it(`responds with 400 and an error message when the '${field}' is missing`, () => {
@@ -120,7 +110,6 @@ describe("folders Endpoints", function() {
       });
     });
   });
-
   describe(`PATCH /apiFolders/:folder_id`, () => {
     context(`Given no folders`, () => {
       it(`responds with 404`, () => {
@@ -159,8 +148,7 @@ describe("folders Endpoints", function() {
       });
     });
   });
-
-  describe.only(`DELETE /api/folders/:folder_id`, () => {
+  describe(`DELETE /api/folders/:folder_id`, () => {
     context(`Given no folders`, () => {
       it(`responds with 404`, () => {
         const folderId = 123456;
