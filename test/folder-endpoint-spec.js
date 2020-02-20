@@ -16,11 +16,15 @@ describe("folders Endpoints", function() {
   after("disconnect from db", () => db.destroy());
 
   before("clean the table", () => {
-    db.raw("TRUNCATE TABLE folder RESTART IDENTITY CASCADE");
+    return Promise.all([
+      db.raw(`truncate table folder restart identity cascade`)
+    ]);
   });
 
   afterEach("cleanup", () => {
-    db.raw("TRUNCATE TABLE folder RESTART IDENTITY CASCADE");
+    return Promise.all([
+      db.raw(`truncate table folder restart identity cascade`)
+    ]);
   });
 
   describe(`GET /api/folders`, () => {

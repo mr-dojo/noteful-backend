@@ -17,13 +17,17 @@ describe("note Endpoints", function() {
   after("disconnect from db", () => db.destroy());
 
   before("clean the table", () => {
-    db.raw("TRUNCATE TABLE note RESTART IDENTITY CASCADE");
-    db.raw("TRUNCATE TABLE folder RESTART IDENTITY CASCADE");
+    return Promise.all([
+      db.raw(`truncate table folder restart identity cascade`),
+      db.raw(`truncate table note restart identity cascade`)
+    ]);
   });
 
   afterEach("cleanup", () => {
-    db.raw("TRUNCATE TABLE folder RESTART IDENTITY CASCADE");
-    db.raw("TRUNCATE TABLE note RESTART IDENTITY CASCADE");
+    return Promise.all([
+      db.raw(`truncate table folder restart identity cascade`),
+      db.raw(`truncate table note restart identity cascade`)
+    ]);
   });
 
   describe(`GET /api/notes`, () => {
